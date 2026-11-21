@@ -21,7 +21,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/readme-validator
+      - uses: mramitdas/readme-val/.github/actions/readme-validator@main
         with:
           repo: ${{ github.repository }}
           threshold: 6
