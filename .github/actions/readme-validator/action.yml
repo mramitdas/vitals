@@ -17,5 +17,11 @@ outputs:
     description: 'Markdown-ready badge SVG code'
     value: ${{ steps.validator.outputs.badge_svg }}
 runs:
-  using: 'node20'
-  main: 'entrypoint.sh'
+  using: 'composite'
+  steps:
+    - id: validator
+      shell: bash
+      env:
+        INPUT_REPO: ${{ inputs.repo }}
+        INPUT_THRESHOLD: ${{ inputs.threshold }}
+      run: bash "${{ github.action_path }}/entrypoint.sh"
