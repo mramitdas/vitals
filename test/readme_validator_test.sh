@@ -24,10 +24,11 @@ EOF
 
 run_case() {
   local name="$1" dir="$2" threshold="$3" want_score="$4" want_exit="$5"
+  local repo="${6:-}" gh_repo="${7:-}"
   local out="$TMP/out"
   : > "$out"
-  INPUT_REPO= INPUT_THRESHOLD="$threshold" GITHUB_WORKSPACE="$dir" \
-    GITHUB_REPOSITORY= GITHUB_OUTPUT="$out" bash "$ENTRY" >/dev/null 2>&1
+  INPUT_REPO="$repo" INPUT_THRESHOLD="$threshold" GITHUB_WORKSPACE="$dir" \
+    GITHUB_REPOSITORY="$gh_repo" GITHUB_OUTPUT="$out" bash "$ENTRY" >/dev/null 2>&1
   local rc=$?
   local got
   got="$(grep -E '^score=' "$out" | tail -1 | cut -d= -f2)"
@@ -57,6 +58,14 @@ mkdir -p "$dir_emptylink"
 run_case "real empty link loses a point" "$dir_emptylink" 6 6 0
 
 run_case "below threshold fails the job" "$dir_emptylink" 7 6 1
+
+dir_variant="$TMP/variant"
+mkdir -p "$dir_variant"
+perfect_readme > "$dir_variant/Readme.md"
+run_case "capitalized Readme.md is found" "$dir_variant" 6 7 0
+
+run_case "matching repo uses workspace (no clone)" "$dir_perfect" 6 7 0 "owner/repo" "owner/repo"
+run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
 
 echo "---"
 echo "$PASS passed, $FAIL failed"

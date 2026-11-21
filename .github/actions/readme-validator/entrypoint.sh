@@ -12,21 +12,24 @@ trap cleanup EXIT
 # --- Resolve source directory ---
 if [ -z "$REPO" ]; then
   SRC="${GITHUB_WORKSPACE:-$PWD}"
+elif [ -n "${GITHUB_REPOSITORY:-}" ] && [ "$REPO" = "$GITHUB_REPOSITORY" ]; then
+  SRC="${GITHUB_WORKSPACE:-$PWD}"
 else
+  if ! printf '%s' "$REPO" | grep -qE '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'; then
+    echo "::error ::Invalid repo '${REPO}'. Use owner/repo."
+    exit 1
+  fi
   WORKDIR=$(mktemp -d)
-  git clone "https://github.com/${REPO}.git" "$WORKDIR" 2>/dev/null || {
+  git clone --depth 1 "https://github.com/${REPO}.git" "$WORKDIR" || {
     echo "::error ::Failed to clone repository: ${REPO}"
     exit 1
   }
   SRC="$WORKDIR"
 fi
 
-# --- Read README ---
-if [ -f "$SRC/README.md" ]; then
-  README="$SRC/README.md"
-elif [ -f "$SRC/readme.md" ]; then
-  README="$SRC/readme.md"
-else
+# --- Read README (case-insensitive name) ---
+README=$(find "$SRC" -maxdepth 1 -type f -iname 'readme*' 2>/dev/null | sort | head -1)
+if [ -z "$README" ]; then
   echo "::error ::No README found in ${REPO:-$SRC}"
   exit 1
 fi
