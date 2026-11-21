@@ -20,10 +20,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: readme-val/readme-validator@v1
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/readme-validator
         with:
           repo: ${{ github.repository }}
-          threshold: 7
+          threshold: 6
 ```
 
 ### Install via cURL
