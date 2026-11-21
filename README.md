@@ -1,6 +1,6 @@
 # README Validator
 
-**Validate README quality and generate a health score badge.**
+**Purpose:** validate README quality and generate a health score badge.
 
 [![README Score](badge.svg)](badge.svg)
 
@@ -37,7 +37,7 @@ The action checks 7 criteria and returns a score from 0-7:
 | Badges present | Contains at least one badge image |
 | License mentioned | Contains license-related text |
 | Code of Conduct mentioned | Contains CoC reference |
-| No empty links | No bare `[]()` link syntax |
+| No empty links | No empty link URLs |
 | Contributing guidelines | Contains "contributing" or "contribute" |
 | Purpose/description | First 5 lines contain purpose/description words |
 
@@ -69,7 +69,7 @@ cat /tmp/out
 2. **Badges**: Contains `!\[[^]]*\]\([^)]*\.(svg|png|gif)` pattern
 3. **License**: Contains `license`, `mit`, `apache`, or `gpl` (case-insensitive)
 4. **Code of Conduct**: Contains `code of conduct` or `conduct` (case-insensitive)
-5. **No empty links**: No `[]()` pattern in the README
+5. **No empty links**: No empty link URLs in the README
 6. **Contributing**: Contains `contributing` or `contribute` (case-insensitive)
 7. **Purpose/description**: First 5 lines contain `purpose`, `description`, or `overview` (case-insensitive)
 
