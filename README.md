@@ -4,7 +4,7 @@
 
 [![README Score](badge.svg)](badge.svg)
 
-A GitHub Action that checks any README and returns a score from 0-10 across 7 criteria, plus a machine-readable badge.
+A GitHub Action that checks any README and returns a score from 0-7 across 7 criteria, plus a machine-readable badge.
 
 ## Quick Start
 
@@ -29,7 +29,7 @@ jobs:
 
 ## How It Works
 
-The action checks 7 criteria and returns a score from 0-10:
+The action checks 7 criteria and returns a score from 0-7:
 
 | Criteria | Check |
 |---|---|
@@ -43,7 +43,7 @@ The action checks 7 criteria and returns a score from 0-10:
 
 Plus generates a **Markdown badge SVG** output:
 ```markdown
-![README Score: 7/10](badge.svg)
+![README Score: 7/7](badge.svg)
 ```
 
 ## Run Locally
@@ -58,10 +58,10 @@ cat /tmp/out
 
 | README Quality | Score |
 |---|---|
-| Minimal (title only) | 1/10 |
-| Basic (title + badges) | 3/10 |
-| Standard (good practices) | 6/10 |
-| Excellent (full score) | 10/10 |
+| Minimal (title only) | 1/7 |
+| Basic (title + badges) | 3/7 |
+| Standard (good practices) | 6/7 |
+| Excellent (full score) | 7/7 |
 
 ## Criteria Detail
 
@@ -77,7 +77,7 @@ cat /tmp/out
 
 The action outputs two values:
 
-- `score`: Numerical score from 0-10
+- `score`: Numerical score from 0-7
 - `badge_svg`: Markdown-ready SVG badge code
 
 Example `result.json`:

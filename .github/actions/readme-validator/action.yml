@@ -6,12 +6,12 @@ inputs:
     required: false
     default: ''
   threshold:
-    description: 'Minimum score to pass (0-10)'
+    description: 'Minimum score to pass (0-7)'
     required: false
     default: '6'
 outputs:
   score:
-    description: 'Numerical score (0-10)'
+    description: 'Numerical score (0-7)'
     value: ${{ steps.validator.outputs.score }}
   badge_svg:
     description: 'Markdown-ready badge SVG code'

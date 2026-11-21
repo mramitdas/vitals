@@ -5,37 +5,34 @@ set -euo pipefail
 REPO="${INPUT_REPO:-}"
 THRESHOLD="${INPUT_THRESHOLD:-6}"
 
-# --- Resolve repo ---
-if [ -z "$REPO" ]; then
-  REPO="${GITHUB_REPOSITORY}"
-fi
+WORKDIR=""
+cleanup() { if [ -n "$WORKDIR" ]; then rm -rf "$WORKDIR"; fi; }
+trap cleanup EXIT
 
+# --- Resolve source directory ---
 if [ -z "$REPO" ]; then
-  echo "::error ::No repository specified. Use INPUT_REPO or set GITHUB_REPOSITORY."
-  exit 1
+  SRC="${GITHUB_WORKSPACE:-$PWD}"
+else
+  WORKDIR=$(mktemp -d)
+  git clone "https://github.com/${REPO}.git" "$WORKDIR" 2>/dev/null || {
+    echo "::error ::Failed to clone repository: ${REPO}"
+    exit 1
+  }
+  SRC="$WORKDIR"
 fi
-
-# --- Clone repo (read-only) ---
-WORKDIR=$(mktemp -d)
-git clone "https://github.com/${REPO}.git" "$WORKDIR" 2>/dev/null || {
-  echo "::error ::Failed to clone repository: ${REPO}"
-  exit 1
-}
 
 # --- Read README ---
-README="$WORKDIR/README.md"
-if [ ! -f "$README" ]; then
-  README="$WORKDIR/readme.md"
-fi
-
-if [ ! -f "$README" ]; then
-  echo "::error ::No README.md found in ${REPO}"
+if [ -f "$SRC/README.md" ]; then
+  README="$SRC/README.md"
+elif [ -f "$SRC/readme.md" ]; then
+  README="$SRC/readme.md"
+else
+  echo "::error ::No README found in ${REPO:-$SRC}"
   exit 1
 fi
 
-# --- Scoring ---
+# --- Scoring (7 checks, one point each) ---
 SCORE=0
-MAX_SCORE=10
 
 # 1. Title/description (first line or H1)
 TITLE=$(head -1 "$README" | sed 's/^# //' | sed 's/^## //')
@@ -60,7 +57,7 @@ if grep -qiE 'code of conduct|conduct' "$README" 2>/dev/null; then
 fi
 
 # 5. Links check (basic: no empty markdown links)
-EMPTY_LINKS=$(grep -cP '\[ \]' "$README" 2>/dev/null || true)
+EMPTY_LINKS=$(grep -cE '\[ \]' "$README" 2>/dev/null || true)
 if [ "$EMPTY_LINKS" -eq 0 ]; then
   SCORE=$((SCORE + 1))
 fi
@@ -75,18 +72,14 @@ if head -5 "$README" | grep -qiE 'purpose|description|overview'; then
   SCORE=$((SCORE + 1))
 fi
 
-# --- Badge SVG generation ---
-# Simple badge: e.g., "Score: 7/10"
-BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='80' height='20' role='img' aria-label='README Score: ${SCORE}/10'><rect width='80' height='20' rx='3' fill='#eeeeee'/><text x='4' y='15' fill='#333333' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>Score: ${SCORE}/10</text></svg>"
+# --- Badge SVG generation (score out of 7) ---
+BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='80' height='20' role='img' aria-label='README Score: ${SCORE}/7'><rect width='80' height='20' rx='3' fill='#eeeeee'/><text x='4' y='15' fill='#333333' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>Score: ${SCORE}/7</text></svg>"
 
 # --- Output ---
 echo "score=${SCORE}" >> "$GITHUB_OUTPUT"
 echo "badge_svg=${BADGE_SVG}" >> "$GITHUB_OUTPUT"
 
-# --- Cleanup ---
-rm -rf "$WORKDIR"
-
 # --- Optional failure ---
 if [ "$SCORE" -lt "$THRESHOLD" ]; then
-  echo "::warning ::README score ${SCORE}/10 is below threshold ${THRESHOLD}. Consider improving your README."
+  echo "::warning ::README score ${SCORE}/7 is below threshold ${THRESHOLD}. Consider improving your README."
 fi
