@@ -78,12 +78,15 @@ fi
 # --- Badge SVG generation (score out of 7) ---
 if [ "$SCORE" -ge 6 ]; then
   SCORE_COLOR="#4c1"
+  SCORE_TEXT="#ffffff"
 elif [ "$SCORE" -ge 4 ]; then
   SCORE_COLOR="#dfb317"
+  SCORE_TEXT="#333333"
 else
   SCORE_COLOR="#e05d44"
+  SCORE_TEXT="#ffffff"
 fi
-BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='96' height='20' role='img' aria-label='Vitals: ${SCORE}/7'><rect width='96' height='20' rx='3' fill='${SCORE_COLOR}'/><text x='8' y='14' fill='#ffffff' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>vitals ${SCORE}/7</text></svg>"
+BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='100' height='20' role='img' aria-label='Vitals README score: ${SCORE}/7'><title>Vitals: ${SCORE}/7</title><rect width='100' height='20' rx='3' fill='#555'/><path d='M52 0h45a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H52z' fill='${SCORE_COLOR}'/><text x='26' y='14' text-anchor='middle' fill='#ffffff' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>vitals</text><text x='76' y='14' text-anchor='middle' fill='${SCORE_TEXT}' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>${SCORE}/7</text></svg>"
 
 # --- Output ---
 echo "score=${SCORE}" >> "$GITHUB_OUTPUT"

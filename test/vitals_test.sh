@@ -70,12 +70,12 @@ run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
 : > "$TMP/badge-out"
 INPUT_REPO= INPUT_THRESHOLD=6 GITHUB_WORKSPACE="$dir_perfect" GITHUB_REPOSITORY= \
   GITHUB_OUTPUT="$TMP/badge-out" bash "$ENTRY" >/dev/null 2>&1
-if grep -q 'vitals 7/7' "$TMP/badge-out" && grep -q '#4c1' "$TMP/badge-out"; then
+if grep -q '>vitals<' "$TMP/badge-out" && grep -q '>7/7<' "$TMP/badge-out" && grep -q '#4c1' "$TMP/badge-out"; then
   PASS=$((PASS + 1))
-  printf 'PASS badge shows vitals 7/7 in green\n'
+  printf 'PASS scorecard shows vitals 7/7 in green\n'
 else
   FAIL=$((FAIL + 1))
-  printf 'FAIL badge branding/color\n'
+  printf 'FAIL scorecard branding/color\n'
 fi
 
 echo "---"
