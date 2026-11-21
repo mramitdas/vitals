@@ -27,18 +27,6 @@ jobs:
           threshold: 6
 ```
 
-### Install via cURL
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/mramitdas/readme-val/main/scripts/install.sh | sh
-```
-
-### Or via Go
-
-```sh
-go install github.com/mramitdas/readme-val@v0.1.0
-```
-
 ## How It Works
 
 The action checks 7 criteria and returns a score from 0-10:
@@ -58,18 +46,12 @@ Plus generates a **Markdown badge SVG** output:
 ![README Score: 7/10](badge.svg)
 ```
 
-## Try It
+## Run Locally
 
 ```sh
-# Option 1: One-line install
-curl -fsSL https://raw.githubusercontent.com/mramitdas/readme-val/main/scripts/install.sh | sh
-
-# Option 2: Go install
-go install github.com/mramitdas/readme-val@v0.1.0
-
-# Option 3: Manual clone
-git clone https://github.com/mramitdas/readme-val
-cd readme-val
+INPUT_REPO= INPUT_THRESHOLD=6 GITHUB_WORKSPACE=. GITHUB_OUTPUT=/tmp/out \
+  bash .github/actions/readme-validator/entrypoint.sh
+cat /tmp/out
 ```
 
 ## Score Examples
@@ -109,20 +91,6 @@ Example `result.json`:
   "durationSeconds": 7.733333333333333,
   "warnings": []
 }
-```
-
-## Try It
-
-```sh
-# Option 1: One-line install
-curl -fsSL https://raw.githubusercontent.com/mramitdas/readme-val/main/scripts/install.sh | sh
-
-# Option 2: Go install
-go install github.com/mramitdas/readme-val@v0.1.0
-
-# Option 3: Manual clone
-git clone https://github.com/mramitdas/readme-val
-cd readme-val
 ```
 
 ## Demo
