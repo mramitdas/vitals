@@ -1,5 +1,5 @@
-name: 'README Validator'
-description: 'Validate README quality and generate a health score badge'
+name: 'Vitals'
+description: 'Score any README from 0-7 and show a README health badge'
 inputs:
   repo:
     description: 'Repository to validate (format: owner/repo)'

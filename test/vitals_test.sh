@@ -2,7 +2,7 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-ENTRY="$HERE/../.github/actions/readme-validator/entrypoint.sh"
+ENTRY="$HERE/../.github/actions/vitals/entrypoint.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 PASS=0
@@ -66,6 +66,17 @@ run_case "capitalized Readme.md is found" "$dir_variant" 6 7 0
 
 run_case "matching repo uses workspace (no clone)" "$dir_perfect" 6 7 0 "owner/repo" "owner/repo"
 run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
+
+: > "$TMP/badge-out"
+INPUT_REPO= INPUT_THRESHOLD=6 GITHUB_WORKSPACE="$dir_perfect" GITHUB_REPOSITORY= \
+  GITHUB_OUTPUT="$TMP/badge-out" bash "$ENTRY" >/dev/null 2>&1
+if grep -q 'vitals 7/7' "$TMP/badge-out" && grep -q '#4c1' "$TMP/badge-out"; then
+  PASS=$((PASS + 1))
+  printf 'PASS badge shows vitals 7/7 in green\n'
+else
+  FAIL=$((FAIL + 1))
+  printf 'FAIL badge branding/color\n'
+fi
 
 echo "---"
 echo "$PASS passed, $FAIL failed"

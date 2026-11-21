@@ -76,7 +76,14 @@ if head -5 "$README" | grep -qiE 'purpose|description|overview'; then
 fi
 
 # --- Badge SVG generation (score out of 7) ---
-BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='80' height='20' role='img' aria-label='README Score: ${SCORE}/7'><rect width='80' height='20' rx='3' fill='#eeeeee'/><text x='4' y='15' fill='#333333' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>Score: ${SCORE}/7</text></svg>"
+if [ "$SCORE" -ge 6 ]; then
+  SCORE_COLOR="#4c1"
+elif [ "$SCORE" -ge 4 ]; then
+  SCORE_COLOR="#dfb317"
+else
+  SCORE_COLOR="#e05d44"
+fi
+BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='96' height='20' role='img' aria-label='Vitals: ${SCORE}/7'><rect width='96' height='20' rx='3' fill='${SCORE_COLOR}'/><text x='8' y='14' fill='#ffffff' font-size='11' font-family='DejaVu Sans,Verdana,Geneva,sans-serif'>vitals ${SCORE}/7</text></svg>"
 
 # --- Output ---
 echo "score=${SCORE}" >> "$GITHUB_OUTPUT"

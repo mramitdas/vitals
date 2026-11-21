@@ -1,8 +1,8 @@
-# README Validator
+# Vitals
 
-**Purpose:** validate README quality and generate a health score badge.
+**Purpose:** keep your README healthy — score it out of 7 and show a badge.
 
-[![README Score](badge.svg)](badge.svg)
+[![Vitals](badge.svg)](badge.svg)
 
 A GitHub Action that checks any README and returns a score from 0-7 across 7 criteria, plus a machine-readable badge.
 
@@ -11,8 +11,8 @@ A GitHub Action that checks any README and returns a score from 0-7 across 7 cri
 ### Install via GitHub Action
 
 ```yaml
-# .github/workflows/README-validate.yml
-name: README Validator
+# .github/workflows/vitals.yml
+name: Vitals
 on: [push, pull_request]
 jobs:
   validate:
@@ -21,7 +21,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: mramitdas/readme-val/.github/actions/readme-validator@main
+      - uses: mramitdas/vitals/.github/actions/vitals@main
         with:
           repo: ${{ github.repository }}
           threshold: 6
@@ -43,14 +43,14 @@ The action checks 7 criteria and returns a score from 0-7:
 
 Plus generates a **Markdown badge SVG** output:
 ```markdown
-![README Score: 7/7](badge.svg)
+![Vitals: 7/7](badge.svg)
 ```
 
 ## Run Locally
 
 ```sh
 INPUT_REPO= INPUT_THRESHOLD=6 GITHUB_WORKSPACE=. GITHUB_OUTPUT=/tmp/out \
-  bash .github/actions/readme-validator/entrypoint.sh
+  bash .github/actions/vitals/entrypoint.sh
 cat /tmp/out
 ```
 

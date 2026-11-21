@@ -1,12 +1,12 @@
-# Share Your README Score
+# Share Your Vitals Score
 
 Ready to check your repo's README health? Here's how:
 
 ## 1. Add the Action
 
 ```yaml
-# .github/workflows/README-validate.yml
-name: README Validator
+# .github/workflows/vitals.yml
+name: Vitals
 on: [push, pull_request]
 jobs:
   validate:
@@ -15,7 +15,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: mramitdas/readme-val/.github/actions/readme-validator@main
+      - uses: mramitdas/vitals/.github/actions/vitals@main
         with:
           repo: ${{ github.repository }}
           threshold: 6
@@ -44,4 +44,4 @@ What did yours score? 👇
 "My README scored 7/7 — can yours beat it? 📊 @readme_val #CodeQuality #SoftwareEngineering"
 
 **Reddit (r/programming):**
-"Built a GitHub Action that validates README quality and scores 0-7. curious to see everyone's scores! https://github.com/mramitdas/readme-val"
+"Built a GitHub Action that validates README quality and scores 0-7. curious to see everyone's scores! https://github.com/mramitdas/vitals"
