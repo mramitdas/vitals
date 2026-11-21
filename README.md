@@ -66,10 +66,10 @@ cat /tmp/out
 ## Criteria Detail
 
 1. **Title/description**: First line is not empty after removing `# ` or `## `
-2. **Badges**: Contains `!\[.*?\]\(.*?\.(svg|png|gif)` pattern
+2. **Badges**: Contains `!\[[^]]*\]\([^)]*\.(svg|png|gif)` pattern
 3. **License**: Contains `license`, `mit`, `apache`, or `gpl` (case-insensitive)
 4. **Code of Conduct**: Contains `code of conduct` or `conduct` (case-insensitive)
-5. **No empty links**: No `\[ \]` pattern in the README
+5. **No empty links**: No `[]()` pattern in the README
 6. **Contributing**: Contains `contributing` or `contribute` (case-insensitive)
 7. **Purpose/description**: First 5 lines contain `purpose`, `description`, or `overview` (case-insensitive)
 
@@ -80,25 +80,12 @@ The action outputs two values:
 - `score`: Numerical score from 0-7
 - `badge_svg`: Markdown-ready SVG badge code
 
-Example `result.json`:
-```json
-{
-  "ok": true,
-  "exitCode": 0,
-  "video": "/tmp/cursorcam-run/bugsnap-demo-20261120-193852-e84f/video-x.mp4",
-  "poster": "/tmp/cursorcam-run/bugsnap-demo-20261120-193852-e84f/poster-x.jpg",
-  "sizeBytes": 1038094,
-  "durationSeconds": 7.733333333333333,
-  "warnings": []
-}
+Example outputs written to `$GITHUB_OUTPUT`:
 ```
-
-## Demo
-
-A CursorCam-generated demo video is available at `site/demo/bugsnap-demo.mp4` (7.7s, 1.0MB, 1920×1080 30fps).
-
-The demo checks a simulated terminal session showing the capture, inspect, and replay workflow of bugsnap.
+score=7
+badge_svg=<svg ...>Score: 7/7</svg>
+```
 
 ## License
 
-MIT. Not affiliated with SmartBear BugSnag.
+MIT.
