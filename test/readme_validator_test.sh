@@ -56,6 +56,8 @@ mkdir -p "$dir_emptylink"
 { perfect_readme; echo 'See [x]() here.'; } > "$dir_emptylink/README.md"
 run_case "real empty link loses a point" "$dir_emptylink" 6 6 0
 
+run_case "below threshold fails the job" "$dir_emptylink" 7 6 1
+
 echo "---"
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

@@ -79,7 +79,9 @@ BADGE_SVG="<svg xmlns='http://www.w3.org/2000/svg' width='80' height='20' role='
 echo "score=${SCORE}" >> "$GITHUB_OUTPUT"
 echo "badge_svg=${BADGE_SVG}" >> "$GITHUB_OUTPUT"
 
-# --- Optional failure ---
+# --- Fail below threshold ---
 if [ "$SCORE" -lt "$THRESHOLD" ]; then
-  echo "::warning ::README score ${SCORE}/7 is below threshold ${THRESHOLD}. Consider improving your README."
+  echo "::error ::README score ${SCORE}/7 is below threshold ${THRESHOLD}."
+  exit 1
 fi
+echo "::notice ::README score ${SCORE}/7 meets threshold ${THRESHOLD}."
