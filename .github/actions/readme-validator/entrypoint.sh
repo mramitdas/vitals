@@ -41,7 +41,7 @@ if [ -n "$TITLE" ]; then
 fi
 
 # 2. Badges check (look for common badge patterns)
-BADGE_COUNT=$(grep -rohE '!\[.*?\]\(.*?\.(svg|png|gif)(\?.*?)?\)' "$README" 2>/dev/null | wc -l || true)
+BADGE_COUNT=$(grep -rohE '!\[[^]]*\]\([^)]*\.(svg|png|gif)' "$README" 2>/dev/null | wc -l || true)
 if [ "$BADGE_COUNT" -ge 1 ]; then
   SCORE=$((SCORE + 1))
 fi
@@ -56,8 +56,8 @@ if grep -qiE 'code of conduct|conduct' "$README" 2>/dev/null; then
   SCORE=$((SCORE + 1))
 fi
 
-# 5. Links check (basic: no empty markdown links)
-EMPTY_LINKS=$(grep -cE '\[ \]' "$README" 2>/dev/null || true)
+# 5. Links check (basic: no empty markdown links like []())
+EMPTY_LINKS=$(grep -oF ']()' "$README" 2>/dev/null | wc -l || true)
 if [ "$EMPTY_LINKS" -eq 0 ]; then
   SCORE=$((SCORE + 1))
 fi

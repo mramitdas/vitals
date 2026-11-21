@@ -46,6 +46,16 @@ mkdir -p "$dir_perfect"
 perfect_readme > "$dir_perfect/README.md"
 run_case "perfect readme scores 7/7" "$dir_perfect" 6 7 0
 
+dir_tasklist="$TMP/tasklist"
+mkdir -p "$dir_tasklist"
+{ perfect_readme; echo '- [ ] todo'; } > "$dir_tasklist/README.md"
+run_case "markdown task list keeps the link point" "$dir_tasklist" 6 7 0
+
+dir_emptylink="$TMP/emptylink"
+mkdir -p "$dir_emptylink"
+{ perfect_readme; echo 'See [x]() here.'; } > "$dir_emptylink/README.md"
+run_case "real empty link loses a point" "$dir_emptylink" 6 6 0
+
 echo "---"
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
