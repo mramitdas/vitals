@@ -14,7 +14,7 @@ outputs:
     description: 'Numerical score (0-7)'
     value: ${{ steps.validator.outputs.score }}
   badge_svg:
-    description: 'Markdown-ready badge SVG code'
+    description: 'Raw SVG badge markup (save as .svg or embed)'
     value: ${{ steps.validator.outputs.badge_svg }}
 runs:
   using: 'composite'

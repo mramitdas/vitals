@@ -41,7 +41,7 @@ The action checks 7 criteria and returns a score from 0-7:
 | Contributing guidelines | Contains "contributing" or "contribute" |
 | Purpose/description | First 5 lines contain purpose/description words |
 
-Plus generates a **Markdown badge SVG** output:
+Plus generates a **badge SVG** output:
 ```markdown
 ![Vitals: 7/7](badge.svg)
 ```
@@ -78,7 +78,7 @@ cat /tmp/out
 The action outputs two values:
 
 - `score`: Numerical score from 0-7
-- `badge_svg`: Markdown-ready SVG badge code
+- `badge_svg`: Raw SVG badge markup
 
 Example outputs written to `$GITHUB_OUTPUT`:
 ```

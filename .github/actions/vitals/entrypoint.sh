@@ -4,6 +4,7 @@ set -euo pipefail
 # --- Inputs ---
 REPO="${INPUT_REPO:-}"
 THRESHOLD="${INPUT_THRESHOLD:-6}"
+GITHUB_OUTPUT="${GITHUB_OUTPUT:-/dev/stdout}"
 
 if ! printf '%s' "$THRESHOLD" | grep -qE '^[0-7]$'; then
   echo "::error ::threshold must be a whole number from 0 to 7 (got '${THRESHOLD}')."
@@ -25,6 +26,7 @@ else
     exit 1
   fi
   WORKDIR=$(mktemp -d)
+  # shortcut: cross-repo clone uses public HTTPS; private repos need a token
   git clone --depth 1 "https://github.com/${REPO}.git" "$WORKDIR" || {
     echo "::error ::Failed to clone repository: ${REPO}"
     exit 1
