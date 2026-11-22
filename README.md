@@ -33,7 +33,7 @@ The action checks 7 criteria and returns a score from 0-7:
 
 | Criteria | Check |
 |---|---|
-| Title/description present | First line is not empty |
+| Title/description present | First non-empty line is a heading or text (not a bare image) |
 | Badges present | Contains at least one badge image |
 | License mentioned | Contains license-related text |
 | Code of Conduct mentioned | Contains CoC reference |
@@ -58,17 +58,17 @@ cat /tmp/out
 
 | README Quality | Score |
 |---|---|
-| Minimal (title only) | 1/7 |
+| Minimal (title only) | 2/7 |
 | Basic (title + badges) | 3/7 |
 | Standard (good practices) | 6/7 |
 | Excellent (full score) | 7/7 |
 
 ## Criteria Detail
 
-1. **Title/description**: First line is not empty after removing `# ` or `## `
-2. **Badges**: Contains `!\[[^]]*\]\([^)]*\.(svg|png|gif)` pattern
-3. **License**: Contains `license`, `mit`, `apache`, or `gpl` (case-insensitive)
-4. **Code of Conduct**: Contains `code of conduct` or `conduct` (case-insensitive)
+1. **Title/description**: First non-empty line is a heading or text, not a bare image or link
+2. **Badges**: Contains any `![alt](url)` image (file extension not required, so shields.io works)
+3. **License**: Contains `license`, or the whole word `mit`, `apache`, or `gpl` (case-insensitive)
+4. **Code of Conduct**: Contains `code of conduct` or the whole word `conduct` (case-insensitive)
 5. **No empty links**: No empty link URLs in the README
 6. **Contributing**: Contains `contributing` or `contribute` (case-insensitive)
 7. **Purpose/description**: First 5 lines contain `purpose`, `description`, or `overview` (case-insensitive)
@@ -83,8 +83,12 @@ The action outputs two values:
 Example outputs written to `$GITHUB_OUTPUT`:
 ```
 score=7
-badge_svg=<svg ...>Score: 7/7</svg>
+badge_svg=<svg ...>vitals</text><text ...>7/7</text></svg>
 ```
+
+To check another repo, set `repo: owner/repo`; leave it blank to check the current repo. Cross-repo checks clone over HTTPS, so private repos need a token/checkout step.
+
+The badge in this README is generated from the script: run `bash scripts/update-badge.sh` to refresh `badge.svg`.
 
 ## License
 

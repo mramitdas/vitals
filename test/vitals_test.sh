@@ -67,6 +67,30 @@ run_case "capitalized Readme.md is found" "$dir_variant" 6 7 0
 run_case "matching repo uses workspace (no clone)" "$dir_perfect" 6 7 0 "owner/repo" "owner/repo"
 run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
 
+dir_commit="$TMP/commit"
+mkdir -p "$dir_commit"
+printf '# Repo\nThis project has a commit history.\n' > "$dir_commit/README.md"
+run_case "word 'commit' is not a license" "$dir_commit" 0 2 0
+
+dir_conduct="$TMP/conduct"
+mkdir -p "$dir_conduct"
+printf '# Repo\nWe conducted tests.\n' > "$dir_conduct/README.md"
+run_case "word 'conducted' is not a code of conduct" "$dir_conduct" 0 2 0
+
+dir_shields="$TMP/shields"
+mkdir -p "$dir_shields"
+perfect_readme | sed 's#https://example.com/badge.svg#https://img.shields.io/badge/build-passing-green#' > "$dir_shields/README.md"
+run_case "extensionless shields.io badge counts" "$dir_shields" 6 7 0
+
+dir_badgeonly="$TMP/badgeonly"
+mkdir -p "$dir_badgeonly"
+printf '![badge](x.svg)\nDescription of purpose.\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs welcome.\n' > "$dir_badgeonly/README.md"
+run_case "badge-only first line gets no title point" "$dir_badgeonly" 0 6 0
+
+run_case "non-numeric threshold fails" "$dir_perfect" "abc" "" 1
+run_case "out-of-range threshold fails" "$dir_perfect" "9" "" 1
+run_case "missing workspace directory fails" "$TMP/does-not-exist" 6 "" 1
+
 : > "$TMP/badge-out"
 INPUT_REPO= INPUT_THRESHOLD=6 GITHUB_WORKSPACE="$dir_perfect" GITHUB_REPOSITORY= \
   GITHUB_OUTPUT="$TMP/badge-out" bash "$ENTRY" >/dev/null 2>&1
@@ -76,6 +100,17 @@ if grep -q '>vitals<' "$TMP/badge-out" && grep -q '>7/7<' "$TMP/badge-out" && gr
 else
   FAIL=$((FAIL + 1))
   printf 'FAIL scorecard branding/color\n'
+fi
+
+: > "$TMP/badge-low"
+INPUT_REPO= INPUT_THRESHOLD=0 GITHUB_WORKSPACE="$dir_commit" GITHUB_REPOSITORY= \
+  GITHUB_OUTPUT="$TMP/badge-low" bash "$ENTRY" >/dev/null 2>&1
+if grep -q '>2/7<' "$TMP/badge-low" && grep -q '#e05d44' "$TMP/badge-low"; then
+  PASS=$((PASS + 1))
+  printf 'PASS low score turns the scorecard red\n'
+else
+  FAIL=$((FAIL + 1))
+  printf 'FAIL low-score badge color\n'
 fi
 
 echo "---"

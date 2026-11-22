@@ -2,7 +2,7 @@ name: 'Vitals'
 description: 'Score any README from 0-7 and show a README health badge'
 inputs:
   repo:
-    description: 'Repository to validate (format: owner/repo)'
+    description: 'Repository to check (owner/repo). Leave blank to check the current repository.'
     required: false
     default: ''
   threshold:
