@@ -11,6 +11,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v5
+      - name: Run action tests
+        run: bash test/vitals_test.sh
       - uses: ./.github/actions/vitals
         with:
           repo: ${{ github.repository }}
