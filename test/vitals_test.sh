@@ -70,12 +70,33 @@ run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
 dir_commit="$TMP/commit"
 mkdir -p "$dir_commit"
 printf '# Repo\nThis project has a commit history.\n' > "$dir_commit/README.md"
-run_case "word 'commit' is not a license" "$dir_commit" 0 2 0
+run_case "word 'commit' is not a license" "$dir_commit" 0 1 0
 
 dir_conduct="$TMP/conduct"
 mkdir -p "$dir_conduct"
 printf '# Repo\nWe conducted tests.\n' > "$dir_conduct/README.md"
-run_case "word 'conducted' is not a code of conduct" "$dir_conduct" 0 2 0
+run_case "word 'conducted' is not a code of conduct" "$dir_conduct" 0 1 0
+
+dir_empty="$TMP/empty"
+mkdir -p "$dir_empty"
+: > "$dir_empty/README.md"
+run_case "empty readme scores 0" "$dir_empty" 0 0 0
+
+dir_priority="$TMP/priority"
+mkdir -p "$dir_priority"
+perfect_readme > "$dir_priority/README.md"
+printf '# Other\n' > "$dir_priority/readme-old.md"
+run_case "README.md wins over other readme files" "$dir_priority" 0 7 0
+
+dir_fenced="$TMP/fenced"
+mkdir -p "$dir_fenced"
+printf '# Docs\nDescription of purpose.\nSee [docs](https://example.com).\n```markdown\n![example](x)\n```\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs welcome.\n' > "$dir_fenced/README.md"
+run_case "image inside code fence is not a badge" "$dir_fenced" 0 6 0
+
+dir_paren="$TMP/paren"
+mkdir -p "$dir_paren"
+perfect_readme | sed 's#https://example.com/badge.svg#https://en.wikipedia.org/wiki/Foo_(bar).svg#' > "$dir_paren/README.md"
+run_case "badge URL with parentheses counts" "$dir_paren" 6 7 0
 
 dir_shields="$TMP/shields"
 mkdir -p "$dir_shields"
@@ -105,7 +126,7 @@ fi
 : > "$TMP/badge-low"
 INPUT_REPO= INPUT_THRESHOLD=0 GITHUB_WORKSPACE="$dir_commit" GITHUB_REPOSITORY= \
   GITHUB_OUTPUT="$TMP/badge-low" bash "$ENTRY" >/dev/null 2>&1
-if grep -q '>2/7<' "$TMP/badge-low" && grep -q '#e05d44' "$TMP/badge-low"; then
+if grep -q '>1/7<' "$TMP/badge-low" && grep -q '#e05d44' "$TMP/badge-low"; then
   PASS=$((PASS + 1))
   printf 'PASS low score turns the scorecard red\n'
 else

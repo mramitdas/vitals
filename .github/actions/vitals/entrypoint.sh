@@ -16,9 +16,11 @@ cleanup() { if [ -n "$WORKDIR" ]; then rm -rf "$WORKDIR"; fi; }
 trap cleanup EXIT
 
 # --- Resolve source directory ---
+REPO_LOWER=$(printf '%s' "$REPO" | tr '[:upper:]' '[:lower:]')
+GH_LOWER=$(printf '%s' "${GITHUB_REPOSITORY:-}" | tr '[:upper:]' '[:lower:]')
 if [ -z "$REPO" ]; then
   SRC="${GITHUB_WORKSPACE:-$PWD}"
-elif [ -n "${GITHUB_REPOSITORY:-}" ] && [ "$REPO" = "$GITHUB_REPOSITORY" ]; then
+elif [ -n "$REPO_LOWER" ] && [ "$REPO_LOWER" = "$GH_LOWER" ]; then
   SRC="${GITHUB_WORKSPACE:-$PWD}"
 else
   if ! printf '%s' "$REPO" | grep -qE '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'; then
@@ -39,12 +41,21 @@ if [ ! -d "$SRC" ]; then
   exit 1
 fi
 
-# --- Read README (case-insensitive name) ---
-README=$(find "$SRC" -maxdepth 1 -type f -iname 'readme*' 2>/dev/null | sort | head -1 || true)
+# --- Read README (prefer README.md, then README, then any readme*) ---
+README=$(find "$SRC" -maxdepth 1 -type f -iname 'readme.md' 2>/dev/null | sort | head -1 || true)
+if [ -z "$README" ]; then
+  README=$(find "$SRC" -maxdepth 1 -type f -iname 'readme' 2>/dev/null | sort | head -1 || true)
+fi
+if [ -z "$README" ]; then
+  README=$(find "$SRC" -maxdepth 1 -type f -iname 'readme*' 2>/dev/null | sort | head -1 || true)
+fi
 if [ -z "$README" ]; then
   echo "::error ::No README found in ${REPO:-$SRC}"
   exit 1
 fi
+
+# Content outside fenced code blocks (so example snippets are not scored)
+BODY=$(awk '/^[[:space:]]*(```|~~~)/{in_fence=!in_fence; next} !in_fence' "$README")
 
 # --- Scoring (7 checks, one point each) ---
 SCORE=0
@@ -58,30 +69,31 @@ if [ -n "$TITLE" ] \
   SCORE=$((SCORE + 1))
 fi
 
-# 2. Badges: any markdown image (covers .svg/.png and extensionless shields.io URLs)
-BADGE_COUNT=$(grep -rohE '!\[[^]]*\]\([^)]*\)' "$README" 2>/dev/null | wc -l || true)
+# 2. Badges: any markdown image outside code blocks (URLs may contain parentheses)
+BADGE_COUNT=$(printf '%s\n' "$BODY" | grep -ohE '!\[[^]]*\]\([^[:space:]]*\)' | wc -l || true)
 if [ "$BADGE_COUNT" -ge 1 ]; then
   SCORE=$((SCORE + 1))
 fi
 
 # 3. License (whole words, so "commit"/"submit" do not count)
-if grep -qiE 'license|(^|[^a-z])mit([^a-z]|$)|apache|gpl' "$README" 2>/dev/null; then
+if printf '%s\n' "$BODY" | grep -qiE 'license|(^|[^a-z])mit([^a-z]|$)|apache|gpl'; then
   SCORE=$((SCORE + 1))
 fi
 
 # 4. Code of conduct (whole word, so "conducted" does not count)
-if grep -qiE 'code of conduct|(^|[^a-z])conduct([^a-z]|$)' "$README" 2>/dev/null; then
+if printf '%s\n' "$BODY" | grep -qiE 'code of conduct|(^|[^a-z])conduct([^a-z]|$)'; then
   SCORE=$((SCORE + 1))
 fi
 
-# 5. Links: no empty markdown links like []()
-EMPTY_LINKS=$(grep -oF ']()' "$README" 2>/dev/null | wc -l || true)
-if [ "$EMPTY_LINKS" -eq 0 ]; then
+# 5. Links: at least one link and no empty markdown links like []()
+LINK_COUNT=$(printf '%s\n' "$BODY" | grep -oE '\]\([^)]*\)' | wc -l || true)
+EMPTY_LINKS=$(printf '%s\n' "$BODY" | grep -oF ']()' | wc -l || true)
+if [ "$LINK_COUNT" -ge 1 ] && [ "$EMPTY_LINKS" -eq 0 ]; then
   SCORE=$((SCORE + 1))
 fi
 
 # 6. Contribution or contributing
-if grep -qiE 'contributing|contribute' "$README" 2>/dev/null; then
+if printf '%s\n' "$BODY" | grep -qiE 'contributing|contribute'; then
   SCORE=$((SCORE + 1))
 fi
 

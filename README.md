@@ -21,7 +21,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v5
-      - uses: mramitdas/vitals/.github/actions/vitals@main
+      - uses: mramitdas/vitals/.github/actions/vitals@v1
         with:
           repo: ${{ github.repository }}
           threshold: 6
@@ -34,10 +34,10 @@ The action checks 7 criteria and returns a score from 0-7:
 | Criteria | Check |
 |---|---|
 | Title/description present | First non-empty line is a heading or text (not a bare image) |
-| Badges present | Contains at least one badge image |
+| Badges present | Contains at least one badge image outside code blocks |
 | License mentioned | Contains license-related text |
 | Code of Conduct mentioned | Contains CoC reference |
-| No empty links | No empty link URLs |
+| Links present | At least one link, none empty |
 | Contributing guidelines | Contains "contributing" or "contribute" |
 | Purpose/description | First 5 lines contain purpose/description words |
 
@@ -58,7 +58,7 @@ cat /tmp/out
 
 | README Quality | Score |
 |---|---|
-| Minimal (title only) | 2/7 |
+| Minimal (title only) | 1/7 |
 | Basic (title + badges) | 3/7 |
 | Standard (good practices) | 6/7 |
 | Excellent (full score) | 7/7 |
@@ -66,10 +66,10 @@ cat /tmp/out
 ## Criteria Detail
 
 1. **Title/description**: First non-empty line is a heading or text, not a bare image or link
-2. **Badges**: Contains any `![alt](url)` image (file extension not required, so shields.io works)
+2. **Badges**: Contains any `![alt](url)` image outside code blocks (URLs may contain parentheses, so shields.io works)
 3. **License**: Contains `license`, or the whole word `mit`, `apache`, or `gpl` (case-insensitive)
 4. **Code of Conduct**: Contains `code of conduct` or the whole word `conduct` (case-insensitive)
-5. **No empty links**: No empty link URLs in the README
+5. **Links**: Contains at least one link and no empty link URLs
 6. **Contributing**: Contains `contributing` or `contribute` (case-insensitive)
 7. **Purpose/description**: First 5 lines contain `purpose`, `description`, or `overview` (case-insensitive)
 
