@@ -1,5 +1,8 @@
 name: 'Vitals'
 description: 'Score any README from 0-7 and show a README health badge'
+branding:
+  icon: 'activity'
+  color: 'green'
 inputs:
   repo:
     description: 'Repository to check (owner/repo). Leave blank to check the current repository.'
@@ -9,6 +12,10 @@ inputs:
     description: 'Minimum score to pass (0-7)'
     required: false
     default: '6'
+  token:
+    description: 'Token used to clone a different (possibly private) repo. Defaults to no auth.'
+    required: false
+    default: ''
 outputs:
   score:
     description: 'Numerical score (0-7)'
@@ -24,4 +31,5 @@ runs:
       env:
         INPUT_REPO: ${{ inputs.repo }}
         INPUT_THRESHOLD: ${{ inputs.threshold }}
+        INPUT_TOKEN: ${{ inputs.token }}
       run: bash "${{ github.action_path }}/entrypoint.sh"

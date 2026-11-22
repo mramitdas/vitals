@@ -5,6 +5,6 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 out="$(mktemp)"
 trap 'rm -f "$out"' EXIT
 INPUT_REPO= INPUT_THRESHOLD=0 GITHUB_WORKSPACE="$ROOT" GITHUB_REPOSITORY= \
-  GITHUB_OUTPUT="$out" bash "$ROOT/.github/actions/vitals/entrypoint.sh" >/dev/null
-sed -n 's/^badge_svg=//p' "$out" > "$ROOT/badge.svg"
+  GITHUB_OUTPUT="$out" bash "$ROOT/entrypoint.sh" >/dev/null
+awk '/^badge_svg<<VITALS_EOF$/{f=1;next} /^VITALS_EOF$/{f=0} f' "$out" > "$ROOT/badge.svg"
 echo "updated $ROOT/badge.svg"

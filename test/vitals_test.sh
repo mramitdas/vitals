@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+# Intentionally no `set -e`: negative cases must be allowed to fail and be asserted.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-ENTRY="$HERE/../.github/actions/vitals/entrypoint.sh"
+ENTRY="$HERE/../entrypoint.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 PASS=0
@@ -12,6 +13,7 @@ perfect_readme() {
   cat <<'EOF'
 # Awesome Tool
 Description of purpose.
+See [docs](https://example.com).
 ![build](https://example.com/badge.svg)
 ## License
 MIT
@@ -64,13 +66,13 @@ mkdir -p "$dir_variant"
 perfect_readme > "$dir_variant/Readme.md"
 run_case "capitalized Readme.md is found" "$dir_variant" 6 7 0
 
-run_case "matching repo uses workspace (no clone)" "$dir_perfect" 6 7 0 "owner/repo" "owner/repo"
+run_case "matching repo uses workspace (no clone)" "$dir_perfect" 6 7 0 "Owner/Repo" "owner/repo"
 run_case "invalid repo input fails" "$dir_perfect" 6 "" 1 "not a repo" ""
 
 dir_commit="$TMP/commit"
 mkdir -p "$dir_commit"
 printf '# Repo\nThis project has a commit history.\n' > "$dir_commit/README.md"
-run_case "word 'commit' is not a license" "$dir_commit" 0 1 0
+run_case "word 'commit' is not a license" "$dir_commit" 0 2 0
 
 dir_conduct="$TMP/conduct"
 mkdir -p "$dir_conduct"
@@ -81,6 +83,11 @@ dir_empty="$TMP/empty"
 mkdir -p "$dir_empty"
 : > "$dir_empty/README.md"
 run_case "empty readme scores 0" "$dir_empty" 0 0 0
+
+dir_noreadme="$TMP/noreadme"
+mkdir -p "$dir_noreadme"
+printf 'notes\n' > "$dir_noreadme/NOTES.txt"
+run_case "missing readme fails" "$dir_noreadme" 0 "" 1
 
 dir_priority="$TMP/priority"
 mkdir -p "$dir_priority"
@@ -93,6 +100,11 @@ mkdir -p "$dir_fenced"
 printf '# Docs\nDescription of purpose.\nSee [docs](https://example.com).\n```markdown\n![example](x)\n```\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs welcome.\n' > "$dir_fenced/README.md"
 run_case "image inside code fence is not a badge" "$dir_fenced" 0 6 0
 
+dir_fence4="$TMP/fence4"
+mkdir -p "$dir_fence4"
+printf '# T\nDescription of purpose.\nSee [d](https://e.com).\n````\n![leak](x.svg)\n```\n![inner](y)\n````\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n' > "$dir_fence4/README.md"
+run_case "4-backtick fence hides inner content" "$dir_fence4" 0 6 0
+
 dir_paren="$TMP/paren"
 mkdir -p "$dir_paren"
 perfect_readme | sed 's#https://example.com/badge.svg#https://en.wikipedia.org/wiki/Foo_(bar).svg#' > "$dir_paren/README.md"
@@ -103,10 +115,40 @@ mkdir -p "$dir_shields"
 perfect_readme | sed 's#https://example.com/badge.svg#https://img.shields.io/badge/build-passing-green#' > "$dir_shields/README.md"
 run_case "extensionless shields.io badge counts" "$dir_shields" 6 7 0
 
+dir_screenshot="$TMP/screenshot"
+mkdir -p "$dir_screenshot"
+printf '# T\nDescription of purpose.\nSee [docs](https://e.com).\n![screenshot](demo.png)\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n' > "$dir_screenshot/README.md"
+run_case "plain screenshot is not a badge" "$dir_screenshot" 0 6 0
+
 dir_badgeonly="$TMP/badgeonly"
 mkdir -p "$dir_badgeonly"
 printf '![badge](x.svg)\nDescription of purpose.\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs welcome.\n' > "$dir_badgeonly/README.md"
-run_case "badge-only first line gets no title point" "$dir_badgeonly" 0 6 0
+run_case "badge-only first line gets no title point" "$dir_badgeonly" 0 5 0
+
+dir_html="$TMP/html"
+mkdir -p "$dir_html"
+printf '<p align="center"><img src="x.png"></p>\n<h1>Title</h1>\nDescription of purpose.\nSee [d](https://e.com).\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n' > "$dir_html/README.md"
+run_case "HTML wrapper then heading gets the title" "$dir_html" 0 6 0
+
+dir_emptyspace="$TMP/emptyspace"
+mkdir -p "$dir_emptyspace"
+printf '# T\nDescription of purpose.\nSee [x](   ) and [y](#).\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n' > "$dir_emptyspace/README.md"
+run_case "whitespace/fragment links count as empty" "$dir_emptyspace" 0 5 0
+
+dir_autolink="$TMP/autolink"
+mkdir -p "$dir_autolink"
+printf '# T\nDescription of purpose.\n<https://example.com>\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n' > "$dir_autolink/README.md"
+run_case "autolink counts as a link" "$dir_autolink" 0 6 0
+
+dir_ref="$TMP/ref"
+mkdir -p "$dir_ref"
+printf '# T\nDescription of purpose.\nSee [docs][ref].\n## License\nMIT\n## Code of Conduct\nBe nice.\n## Contributing\nPRs.\n[ref]: https://example.com\n' > "$dir_ref/README.md"
+run_case "reference-style link counts" "$dir_ref" 0 6 0
+
+dir_negative="$TMP/negative"
+mkdir -p "$dir_negative"
+printf '# T\nDescription of purpose.\nNo license. No code of conduct. Do not contribute.\n' > "$dir_negative/README.md"
+run_case "negated keywords earn no points" "$dir_negative" 0 2 0
 
 run_case "non-numeric threshold fails" "$dir_perfect" "abc" "" 1
 run_case "out-of-range threshold fails" "$dir_perfect" "9" "" 1
@@ -126,7 +168,7 @@ fi
 : > "$TMP/badge-low"
 INPUT_REPO= INPUT_THRESHOLD=0 GITHUB_WORKSPACE="$dir_commit" GITHUB_REPOSITORY= \
   GITHUB_OUTPUT="$TMP/badge-low" bash "$ENTRY" >/dev/null 2>&1
-if grep -q '>1/7<' "$TMP/badge-low" && grep -q '#e05d44' "$TMP/badge-low"; then
+if grep -q '>2/7<' "$TMP/badge-low" && grep -q '#e05d44' "$TMP/badge-low"; then
   PASS=$((PASS + 1))
   printf 'PASS low score turns the scorecard red\n'
 else
